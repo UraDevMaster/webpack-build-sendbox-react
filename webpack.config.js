@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = (env={}) => {
     const { mode = 'development' } = env;
@@ -19,7 +20,8 @@ module.exports = (env={}) => {
                 title: 'Hello World',
                 buildTime: new Date().toISOString(),
                 template: 'public/index.html'
-            })
+            }),
+            new CleanWebpackPlugin()
         ];
 
         if (isProd) {
