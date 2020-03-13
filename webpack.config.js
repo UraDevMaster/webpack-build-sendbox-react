@@ -1,6 +1,8 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require("path");
 
 module.exports = (env={}) => {
     const { mode = 'development' } = env;
@@ -21,7 +23,13 @@ module.exports = (env={}) => {
                 buildTime: new Date().toISOString(),
                 template: 'public/index.html'
             }),
-            new CleanWebpackPlugin()
+            new CleanWebpackPlugin(),
+            new CopyWebpackPlugin([
+                {
+                  from: path.resolve(__dirname, 'src/assets/img/favicon.png'),
+                  to: path.resolve(__dirname, 'dist/images')
+                }
+              ])
         ];
 
         if (isProd) {
@@ -40,7 +48,14 @@ module.exports = (env={}) => {
         output: {
             filename: isProd ? 'main-[hash:8].js' : undefined
         },
-
+        resolve: {
+            extensions: ['.js', '.json', '.png', '.jpg']
+          },
+        optimization: {
+            splitChunks: {
+                chunks: "all"
+            }
+        },
         module: {
             rules: [
                 {
@@ -76,7 +91,7 @@ module.exports = (env={}) => {
                 },
                 {
                     test: /\.(css)$/,
-                    use: getStyleLoaders()
+                    use: getStyleLoaders(),
                 },
                 {
                     test: /\.(s[ca]ss)$/,
