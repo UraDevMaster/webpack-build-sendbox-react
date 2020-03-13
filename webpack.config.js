@@ -2,13 +2,18 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 const path = require("path");
+
+
 
 module.exports = (env={}) => {
     const { mode = 'development' } = env;
 
     const isProd = mode === 'production';
     const isDev = mode === 'development';
+
     const getStyleLoaders = () => {
         return [
             isProd ? MiniCssExtractPlugin.loader : 'style-loader',
@@ -16,12 +21,31 @@ module.exports = (env={}) => {
         ];
     };
 
+    const getOptimization = () => {
+        const config = {
+            splitChunks: {
+                chunks: "all"
+            }
+        }
+        console.log("is prod", isProd);
+        if(isProd) {
+            config.minimizer = [
+                new OptimizeCssAssetWebpackPlugin(),
+                new TerserPlugin()
+            ]
+        }
+        return config
+    }
+
     const getPlugins = () => {
         const plugins = [
             new HtmlWebpackPlugin({
                 title: 'Hello World',
                 buildTime: new Date().toISOString(),
-                template: 'public/index.html'
+                template: 'public/index.html',
+                minify: {
+                    collapseWhitespace: true
+                }
             }),
             new CleanWebpackPlugin(),
             new CopyWebpackPlugin([
@@ -46,16 +70,12 @@ module.exports = (env={}) => {
         mode: isProd ? 'production' : isDev && 'development',
 
         output: {
-            filename: isProd ? 'main-[hash:8].js' : undefined
+            filename: isProd ? '[name]-[hash:8].js' : undefined
         },
         resolve: {
             extensions: ['.js', '.json', '.png', '.jpg']
           },
-        optimization: {
-            splitChunks: {
-                chunks: "all"
-            }
-        },
+        optimization: getOptimization(),
         module: {
             rules: [
                 {
