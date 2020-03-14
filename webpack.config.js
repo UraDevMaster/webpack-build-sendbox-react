@@ -120,6 +120,7 @@ module.exports = (env={}) => {
             ]
         },
         plugins: getPlugins(),
+        devtool: isDev ? "source-map" : "",
         devServer: {
             open: true
         }
